@@ -1,0 +1,3 @@
+.venv
+crawled_*
+__pycache__

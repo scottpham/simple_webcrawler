@@ -42,18 +42,34 @@ uv run playwright install
 ## Installation without UV (traditional pip)
 
 ```bash
-pip install playwright beautifulsoup4
+pip install playwright beautifulsoup4 html2text aiofiles
 playwright install
+```
+
+## Installation with Poetry
+
+```bash
+# Initialize poetry project (if not already done)
+poetry init
+
+# Add dependencies
+poetry add playwright beautifulsoup4 html2text aiofiles
+
+# Install Playwright browsers
+poetry run playwright install
 ```
 
 ## Usage
 
 ### Basic Usage
 ```bash
-# Crawl 10 pages starting from example.com
+# With UV
 uv run python crawler.py example.com 10
 
-# Or activate the virtual environment first
+# With Poetry
+poetry run python crawler.py example.com 10
+
+# With activated virtual environment
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 python crawler.py example.com 10
 ```
@@ -62,6 +78,8 @@ python crawler.py example.com 10
 ```bash
 # Crawl with 5 concurrent pages and custom delay
 uv run python crawler.py https://example.com 20 --concurrent 5 --delay 0.5
+# or with Poetry:
+poetry run python crawler.py https://example.com 20 --concurrent 5 --delay 0.5
 
 # Run in GUI mode (see browser window)
 uv run python crawler.py example.com 10 --gui
@@ -80,7 +98,6 @@ crawled_example_com/
 ├── example_com.md              # Homepage content (Markdown)
 ├── example_com_about.md        # About page content
 ├── example_com_products.md     # Products page content
-├── crawl_log.txt              # Complete crawl log (human-readable)
 ├── crawl_summary.json         # Statistics and metadata
 └── ...
 ```
@@ -110,41 +127,25 @@ We have a dedicated team of professionals...
 [Contact us](https://example.com/contact) for more information.
 ```
 
-### 📊 Crawl Log (New!)
-**`crawl_log.txt` contains the complete crawl history:**
-```
-=== WEB CRAWLER LOG ===
-Start Time: 2025-07-18 14:30:00
-Target URL: https://example.com
-Domain: example.com
-Max Pages: 20
-Concurrent Pages: 3
-Output Directory: crawled_example_com
-Mode: Headless
-
-==================================================
-
-[14:30:05] Starting async Playwright crawl of https://example.com
-[14:30:05] Max pages: 20
-[14:30:05] Domain: example.com
-[14:30:05] Concurrent pages: 3
-[14:30:05] Output directory: crawled_example_com
-[14:30:05] Mode: Headless
-[14:30:05] --------------------------------------------------
-[14:30:06] Crawling: https://example.com
-[14:30:06]   Status: 200
-[14:30:06]   Title: Example Domain
-[14:30:06]   Size: 1256 bytes
-[14:30:06]   ✓ Content saved as markdown
-[14:30:06]   Found 3 links
-[14:30:07] Crawling: https://example.com/about
-[14:30:07]   Status: 200
-[14:30:07]   Title: About Us
-[14:30:07]   Size: 2847 bytes
-[14:30:07]   ✓ Content saved as markdown
-[14:30:07]   Found 8 links
-[14:30:08] Progress: 2/20
-[14:30:08] ------------------------------
+### 📊 Crawl Summary
+**`crawl_summary.json` contains crawl statistics and metadata:**
+```json
+{
+  "domain": "example.com",
+  "start_url": "https://example.com",
+  "crawl_stats": {
+    "pages_crawled": 10,
+    "pages_saved": 10,
+    "start_time": 1705589400.123,
+    "urls_discovered": 27
+  },
+  "total_urls_visited": [
+    "https://example.com",
+    "https://example.com/about",
+    "https://example.com/products"
+  ],
+  "crawl_duration": 8.3
+}
 ```
 
 ## What It Does
@@ -157,20 +158,6 @@ Mode: Headless
 6. **💾 File Saving**: Saves each page as a separate Markdown file with metadata
 7. **📊 Progress Tracking**: Shows real-time statistics and crawl summary
 8. **🔗 Link Discovery**: Finds new pages to crawl within the same domain
-
-## Performance Improvements
-
-**Async benefits:**
-- **3-8x faster** than synchronous crawling
-- Concurrent page processing (default: 3 pages at once)
-- Non-blocking I/O for file operations
-- Efficient browser resource usage
-
-**Content quality:**
-- Removes navigation, ads, and sidebar content
-- Preserves article structure and formatting
-- Maintains links and emphasis markup
-- Adds metadata for each crawled page
 
 ## Output Example
 
@@ -222,40 +209,6 @@ crawled_example_com/
 └── crawl_summary.json              # Crawl statistics and metadata
 ```
 
-## Why Async Playwright?
-
-**Modern websites require modern solutions:**
-- **JavaScript-heavy content**: Traditional crawlers miss dynamically generated content
-- **Performance needs**: Async crawling is 3-8x faster than synchronous approaches
-- **Content quality**: Smart extraction focuses on actual content, not page clutter
-
-**Playwright advantages:**
-- Executes JavaScript like a real browser
-- Waits for AJAX requests to complete
-- Handles single-page applications (SPAs)
-- Works with React, Angular, Vue, and other frameworks
-- Captures content that appears after page load
-
-**Async benefits:**
-- Multiple pages crawled simultaneously
-- Non-blocking file I/O operations
-- Better resource utilization
-- Configurable concurrency limits
-
-## Content Extraction Features
-
-**Smart content detection:**
-- Removes navigation menus, sidebars, ads
-- Focuses on main article/content areas  
-- Preserves important formatting and links
-- Handles various content management systems
-
-**Markdown output:**
-- Clean, readable format
-- Preserves document structure
-- Includes metadata for each page
-- Easy to process with other tools
-
 ## Browser Management
 
 The crawler automatically:
@@ -263,13 +216,6 @@ The crawler automatically:
 - Uses realistic browser headers and viewport
 - Handles HTTPS errors gracefully
 - Cleans up resources when finished or interrupted
-
-## Performance Notes
-
-- Playwright is slower than `requests` but captures all content
-- Use `--delay` to be respectful of target servers
-- Consider running fewer concurrent crawls
-- GUI mode (`--gui`) is useful for debugging but slower
 
 ## Troubleshooting
 
